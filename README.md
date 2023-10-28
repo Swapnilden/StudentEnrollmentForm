@@ -45,14 +45,14 @@ This project implements a web-based Student Enrollment Form. It allows users to 
 <!-- ... -->
 </html>
 
-Project Status
+Project Status <!-- Updated Section Name -->
 Active
 
-Sources
+## Sources <!-- Updated Section Name -->
 https://careers.login2explore.com/mod/page/view.php?id=140
 JsonPowerDB Documentation
 Bootstrap Documentation
 
 
-Other Information
+## Other Information <!-- Updated Section Name -->
 For more details on JsonPowerDB and how to use it effectively, refer to the official documentation provided in the "Sources" section.
