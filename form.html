@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Enrollment Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container mt-5">
+    <form id="studentForm">
+        <div class="form-group">
+            <label for="rollNo">Roll No.</label>
+            <input type="text" class="form-control" id="rollNo" onchange="getSt()">
+        </div>
+        <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" class="form-control" id="fullName" required>
+        </div>
+        <div class="form-group">
+            <label for="class">Class</label>
+            <input type="text" class="form-control" id="classNo" required>
+        </div>
+        <div class="form-group">
+            <label for="birthDate">Birth Date</label>
+            <input type="date" class="form-control" id="birthDate" required>
+        </div>
+        <div class="form-group">
+            <label for="address">Address</label>
+            <input type="text" class="form-control" id="address" required>
+        </div>
+        <div class="form-group">
+            <label for="enrollmentDate">Enrollment Date</label>
+            <input type="date" class="form-control" id="enrollmentDate" required>
+        </div>
+        <button type="button" class="btn btn-primary" id="saveBtn" onclick="saveData()" disabled>Save</button>
+        <button type="button" class="btn btn-success" id="updateBtn" onclick="changeData()" disabled>Update</button>
+        <button type="button" class="btn btn-secondary" id="resetBtn" onclick="resetForm()" disabled>Reset</button>
+    </form>
+</div>
+    
+<script src="https://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+<script>
+    
+    var jpdbBaseURL = "http://api.login2explore.com:5577";
+    var jpdbIRL = "/api/irl";
+    var jpdbIML = "/api/iml";
+    var stDBName = "ST-DB";
+    var stRelationName = "StData";
+    var connToken = "90931561|-31949333387235655|90960027";
+    
+    $("#rollNo").focus();
+    
+    function saveRecNo2LS(jsonObj){
+        var lvData = JSON.parse(jsonObj.data);
+        localStorage.setItem("recno", lvData.rec_no);
+    }
+    
+    function getStIdAsJsonObj() {
+        var StrollNo = $("#rollNo").val();
+        var jsonStr = {
+           rollNo: StrollNo
+        };
+        return JSON.stringify(jsonStr);
+    }
+    
+    function fillData(jsonObj){
+        saveRecNo2LS(jsonObj);
+        var record = JSON.parse(jsonObj.data).record;
+        $("#fullName").val(record.name);
+        $("#classNo").val(record.classNo);
+        $("#birthDate").val(record.birthDate);
+        $("#address").val(record.address);
+        $("#enrollmentDate").val(record.enrollmentDate);
+    }
+        
+        // Function to reset form
+        function resetForm() {
+            
+            $("rollNo").val("");
+            $('#fullName').val("");
+            $('#class').val("");
+            $('#birthDate').val("");
+            $('#address').val("");
+            $('#enrollmentDate').val("");
+           $("rollNo").prop("disabled", false);
+            $('#saveBtn').prop('disabled', true);
+            $('#updateBtn').prop('disabled', true);
+            $('#resetBtn').prop('disabled', true);
+             $("rollNo").focus();
+        }
+
+       
+
+        // Function to save data
+        function saveData() {
+            var jsonStrObj = validateData();
+            if(jsonStrObj === ""){
+                return "";
+            }
+            var putRequest = createPUTRequest(connToken, jsonStrObj, stDBName, stRelationName);
+            jQuery.ajaxSetup({async: false});
+            var resJsonObj = executeCommandAtGivenBaseUrl(putRequest, jpdbBaseURL, jpdbIML);
+            jQuery.ajaxSetup({async: true});
+            resetForm();
+            $('#rollno').focus();
+        }
+        
+        function changeData() {
+            $("#saveBtn").prop("disabled", true);
+            jsonChg = validateData();
+            var updateRequest = createUPDATERecordRequest(connToken, jsonChg, stDBName, stRelationName, localStorage.getItem("recno"));
+            jQuery.ajaxSetup({async: false});
+            var resJsonObj = executeCommandAtGivenBaseUrl(updateRequest, jpdbBaseURL, jpdbIML);
+            jQuery.ajaxSetup({async: true});
+            console.log(resJsonObj);
+            resetForm();
+            $("#rollNo").focus();
+        }
+        
+        function resetForm() {
+            $("#rollNo").val("");
+            $("#fullName").val("");
+             $("#classNo").val("");
+            $("#birthDate").val("");
+             $("#address").val("");
+           $("#enrollmentDate").val("");
+           $("#rollNo").prop("disabled", false);
+           $("#saveBtn").prop("disabled", true);
+           $("updateBtn").prop("disabled", true);
+           $("resetBtn").prop("disabled", true);
+           $("#rollNo").focus();
+        }
+        
+        function validateData() {
+            var StrollNo, StfullName, StclassNo, StbirthDate, Staddress, StenrollmentDate;
+            StrollNo = $("#rollNo").val();
+            StfullName = $("#fullName").val();
+            StclassNo = $("#classNo").val();
+            StbirthDate = $("#birthDate").val();
+            Staddress = $("#address").val();
+            StenrollmentDate = $("#enrollmentDate").val();
+            
+            if (StrollNo === "") {
+                alert("Student Roll No. missing");
+                $("#rollNo").focus();
+                return "";
+            }
+            
+            if(StfullName === "") {
+                alert("Student Name missing");
+                $("#fullName").focus();
+                return "";
+            }
+            
+            if(StclassNo === "") {
+                alert("Student Class missing");
+                $("#classNo").focus();
+                return "";  
+            }
+            
+            if(StbirthDate === ""){
+                alert("Student Birth Date missing");
+                $("#birthDate").focus();
+                return "";
+            }
+            
+            if(Staddress === ""){
+                alert("Student Address missing");
+                $("#address").focus();
+                return "";
+            }
+            
+            if(StenrollmentDate === "") {
+                alert("Enrollment Date missing");
+                $("#enrollmentDate").focus();
+                return "";
+            }
+        
+        
+        var jsonStrObj = {
+            rollNo: StrollNo,
+            name: StfullName,
+            classNo: StclassNo,
+            birthDate: StbirthDate,
+            address: Staddress,
+            enrollmentDate: StenrollmentDate
+            
+        };
+        
+        return JSON.stringify(jsonStrObj);
+        }
+        
+        function getSt(){
+            var stIdJsonObj = getStIdAsJsonObj();
+            var getRequest = createGET_BY_KEYRequest(connToken, stDBName, stRelationName, stIdJsonObj);
+            jQuery.ajaxSetup({async: false});
+            var resJsonObj = executeCommandAtGivenBaseUrl(getRequest, jpdbBaseUrl, jpdbIRL);
+            jQuery.ajaxSetup({async: true});
+            if(resJsonObj.status === 400) {
+                $("#saveBtn").prop("disabled", false);
+                $("#resetBtn").prop("disabled", false);
+                $("#fullName").focus();
+            } else if (resJsonObj.status === 200) {
+                $("#rollNo").prop("disabled", true);
+                fillData(resJsonObj);
+                
+                ("#updateBtn").prop("disabled", false);
+                ("#resetBtn").prop("disabled", false);
+                $("#fullName").focus();
+            }
+        }
+       
+        
+
+       
+       
+</script>
+
+</body>
+</html>
